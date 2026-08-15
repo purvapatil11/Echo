@@ -12,6 +12,8 @@ with no git commits and no redeploy.
 - `upload.js` — file picker, validation, storage upload, DB insert.
 - `supabase.js` — the single shared Supabase client (used by everything).
 - `supabase-config.js` — where `SUPABASE_URL` / `SUPABASE_ANON_KEY` live.
+- `generate-config.js` — optional build helper that writes
+  `supabase-config.js` from env vars (for git-based deploys).
 
 ## Supabase setup
 
