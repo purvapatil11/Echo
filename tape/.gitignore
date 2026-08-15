@@ -1,0 +1,9 @@
+# local credentials — real values stay out of git
+supabase-config.js
+
+# env files (not used yet — the app has no build step, but just in case)
+.env
+.env.*
+
+# node
+node_modules/

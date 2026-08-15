@@ -1,0 +1,6 @@
+{
+  "name": "committee-tape",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Committee Tape — a shared song library where members upload mp3s straight to the tape via Supabase."
+}
