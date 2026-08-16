@@ -42,7 +42,8 @@
     const open = upPanel.hidden;
     upPanel.hidden = !open;
     upToggle.classList.toggle('on', open);
-    upToggle.textContent = open ? '− CLOSE' : '+ ADD A SONG';
+    const txt = upToggle.querySelector('.up-toggle-txt');
+    if (txt) txt.textContent = open ? 'CLOSE' : 'ADD A SONG';
   });
 
   upFile.addEventListener('change', () => {

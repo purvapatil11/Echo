@@ -15,17 +15,20 @@
     --amber:#ffc857;
     --red:#ff5a3d;
     --blue:#4d8dff;
-    --glass:rgba(18,10,34,.42);
+    --mint:#7dffb0;
+    --line:rgba(255,255,255,.14);
+    --ease:cubic-bezier(.22,.9,.3,1);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{height:100%;}
+  html{height:100%;}
   body{
+    position:relative;
+    min-height:100vh;
+    display:flex; flex-direction:column;
     font-family:'Space Grotesk',sans-serif;
     color:var(--paper);
-    overflow:hidden;
-    position:relative;
-    height:100vh; width:100vw;
     background:#0c1730;
+    overflow-x:hidden;
     cursor:none;
   }
   @media (pointer:coarse){ body{cursor:auto;} .cursor-dot,.cursor-ring{display:none;} }
@@ -50,9 +53,9 @@
   .scrim{
     position:fixed; inset:0; z-index:2; pointer-events:none;
     background:
-      linear-gradient(to top, rgba(12,6,24,.55), transparent 36%),
-      linear-gradient(to bottom, rgba(12,6,24,.32), transparent 24%),
-      radial-gradient(70% 55% at 50% 46%, transparent 56%, rgba(12,6,24,.30));
+      linear-gradient(to top, rgba(12,6,24,.58), transparent 34%),
+      linear-gradient(to bottom, rgba(12,6,24,.34), transparent 22%),
+      radial-gradient(70% 55% at 50% 46%, transparent 56%, rgba(12,6,24,.28));
   }
 
   /* film grain */
@@ -60,7 +63,7 @@
     position:fixed; inset:-50%; z-index:60; pointer-events:none;
     width:200%; height:200%;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
-    opacity:.06; mix-blend-mode:overlay;
+    opacity:.05; mix-blend-mode:overlay;
     animation:grain 9s steps(10) infinite;
   }
   @keyframes grain{
@@ -70,32 +73,58 @@
 
   /* giant ghost word for depth */
   .bgword{
-    position:fixed; left:50%; top:30%; transform:translateX(-50%);
+    position:fixed; left:50%; top:32%; transform:translateX(-50%);
     z-index:1; pointer-events:none; user-select:none;
     font-family:'Archivo Black',sans-serif;
-    font-size:clamp(240px, 78vw, 860px);
+    font-size:clamp(220px, 70vw, 800px);
     letter-spacing:.06em; line-height:1; white-space:nowrap;
     color:transparent;
-    -webkit-text-stroke:1.5px rgba(255,246,233,.55);
+    -webkit-text-stroke:1.5px rgba(255,246,233,.5);
     opacity:.07;
   }
 
   /* ---------- HEADER ---------- */
   header{
-    position:absolute; top:0; left:0; right:0; z-index:8;
-    display:flex; justify-content:space-between; align-items:flex-start;
-    padding:24px 30px;
+    position:relative; z-index:8;
+    display:flex; justify-content:space-between; align-items:center; gap:16px;
+    padding:clamp(14px, 2.5vw, 26px) clamp(16px, 4vw, 44px);
     pointer-events:none;
   }
-  .clock{font-size:22px; font-weight:600; letter-spacing:.08em; text-align:right; text-shadow:0 2px 10px rgba(0,0,0,.5);}
-  .clock .date{display:block; font-size:10px; opacity:.7; font-weight:500; letter-spacing:.3em; text-transform:uppercase; margin-top:3px;}
+  .session-pill{
+    display:inline-flex; align-items:center; gap:9px;
+    font-size:11px; font-weight:700; letter-spacing:.26em; text-transform:uppercase;
+    color:#ffe; opacity:.92; text-shadow:0 1px 8px rgba(0,0,0,.5);
+    padding:9px 16px; border-radius:99px;
+    background:rgba(16,9,32,.35); border:1px solid var(--line);
+    backdrop-filter:blur(12px);
+  }
+  .session-pill .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--amber); box-shadow:0 0 10px var(--amber);
+    animation:live 2s ease-in-out infinite;
+  }
+  @keyframes live{50%{opacity:.4}}
+  .clock{
+    font-size:clamp(18px, 2.2vw, 24px); font-weight:600; letter-spacing:.08em;
+    text-align:right; text-shadow:0 2px 12px rgba(0,0,0,.5);
+  }
+  .clock .date{
+    display:block; font-size:10px; opacity:.65; font-weight:500;
+    letter-spacing:.34em; text-transform:uppercase; margin-top:2px;
+  }
 
   /* ---------- DOODLES ---------- */
-  .doodle{position:absolute; z-index:3; pointer-events:none; filter:drop-shadow(0 4px 8px rgba(0,0,0,.25));}
+  .doodle{
+    position:absolute; z-index:3; pointer-events:none;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,.25));
+  }
   .doodle svg{display:block; animation:float 5.5s ease-in-out infinite alternate;}
   @keyframes float{from{transform:translateY(-9px) rotate(-3deg)} to{transform:translateY(9px) rotate(3deg)}}
-  .confetti{position:absolute; z-index:3; width:9px; height:15px; border-radius:2px;
-    pointer-events:none; animation:drift 6s ease-in-out infinite alternate;}
+  .confetti-layer{position:fixed; inset:0; z-index:3; pointer-events:none; overflow:hidden;}
+  .confetti{
+    position:absolute; width:9px; height:15px; border-radius:2px;
+    animation:drift 6s ease-in-out infinite alternate;
+  }
   @keyframes drift{from{transform:translateY(-14px) rotate(-12deg)} to{transform:translateY(14px) rotate(14deg)}}
 
   /* ---------- HERO HEADLINE ---------- */
@@ -106,43 +135,61 @@
     filter:blur(6px);
   }
   main{
-    position:absolute; left:0; right:0; top:15%; z-index:5;
-    text-align:center; padding:0 20px; pointer-events:none;
+    position:relative; z-index:5; flex:1;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:20px 20px 8px; pointer-events:none;
   }
   .title{
     font-family:'Archivo Black',sans-serif;
     text-transform:uppercase; color:var(--paper);
-    text-shadow:
-      0 2px 0 rgba(0,0,0,.22),
-      0 5px 0 rgba(0,0,0,.12),
-      0 16px 40px rgba(0,0,0,.45);
-    line-height:.98; letter-spacing:.01em;
+    line-height:.96; letter-spacing:.01em;
     display:inline-block; text-align:center;
   }
   .lrow{display:block; white-space:nowrap;}
-  .lrow.w1{font-size:clamp(38px, 7.2vw, 86px); letter-spacing:.08em; transform:skewX(-3deg);}
-  .lrow.w2{font-size:clamp(72px, 14.5vw, 176px); letter-spacing:.02em; margin-top:.06em; transform:skewX(-2deg);}
+  .lrow.w1{font-size:clamp(30px, 5.4vw, 72px); letter-spacing:.1em; transform:skewX(-3deg);}
+  .lrow.w1 .l{
+    text-shadow:
+      0 2px 0 rgba(0,0,0,.28),
+      0 5px 0 rgba(0,0,0,.14),
+      0 18px 44px rgba(0,0,0,.5);
+  }
+  .lrow.w2{font-size:clamp(58px, 12.5vw, 160px); letter-spacing:.02em; margin-top:.05em; transform:skewX(-2deg);}
+  .lrow.w2 .l{
+    background:linear-gradient(115deg, var(--amber) 4%, var(--pink) 48%, var(--purple) 96%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(0,0,0,.3)) drop-shadow(0 6px 0 rgba(0,0,0,.12)) drop-shadow(0 18px 40px rgba(255,61,129,.4));
+  }
   .l{display:inline-block; transform:rotate(var(--r,0deg)) translateY(var(--y,0));}
   .sub{
-    margin-top:26px; font-size:clamp(13px,1.5vw,17px); font-weight:600;
-    letter-spacing:.14em; text-transform:uppercase; color:#ffe; opacity:.95;
-    text-shadow:0 2px 12px rgba(0,0,0,.55);
+    margin-top:clamp(14px, 2.6vh, 24px);
+    font-size:clamp(12px, 1.5vw, 16px); font-weight:600;
+    letter-spacing:.16em; text-transform:uppercase; color:#ffe; opacity:.95;
+    text-shadow:0 2px 12px rgba(0,0,0,.6);
   }
   .sub i{font-style:normal; color:var(--amber);}
 
   /* one-liner */
   .people-line{
-    position:absolute; left:50%; bottom:250px; transform:translateX(-50%) rotate(-1.5deg) translate(var(--px,0), var(--py,0));
-    z-index:6; font-size:19px; font-weight:700; letter-spacing:.34em; text-transform:uppercase;
-    color:#ffe; opacity:.9; text-shadow:0 2px 10px rgba(0,0,0,.6);
+    margin-top:clamp(20px, 4vh, 38px);
+    font-size:clamp(12px, 1.4vw, 15px); font-weight:700;
+    letter-spacing:.4em; text-transform:uppercase;
+    color:#ffe; opacity:.85; text-shadow:0 2px 12px rgba(0,0,0,.6);
+    transform:rotate(-1.5deg) translate(var(--px,0), var(--py,0));
     transition:transform .25s ease-out; white-space:nowrap;
   }
 
-  /* ---------- SPOTIFY PLAYER ---------- */
-  .player{
-    position:absolute; left:50%; bottom:70px; transform:translateX(-50%);
-    z-index:7; width:min(560px, 93vw); pointer-events:none;
+  /* ---------- BOTTOM DECK ---------- */
+  .deck{
+    position:relative; z-index:7;
+    width:min(640px, 94vw);
+    margin:0 auto clamp(14px, 3vh, 28px);
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    pointer-events:none;
   }
+  .deck > *{pointer-events:auto;}
+
+  /* ---------- SPOTIFY PLAYER ---------- */
+  .player{position:relative; width:100%; pointer-events:none;}
   .pl-glow{
     position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     width:120%; height:300%; z-index:-1; pointer-events:none;
@@ -152,159 +199,228 @@
   }
   @keyframes glowpulse{0%,100%{opacity:.65; transform:translate(-50%,-50%) scale(1)} 50%{opacity:1; transform:translate(-50%,-50%) scale(1.12)}}
   .pl-label{
-    display:flex; align-items:center; justify-content:center;
-    font-size:13px; font-weight:700; letter-spacing:.3em;
-    color:var(--amber); text-shadow:0 2px 8px rgba(0,0,0,.6);
-    margin-bottom:12px; pointer-events:auto; text-transform:uppercase;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    font-size:12px; font-weight:700; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--amber); text-shadow:0 2px 10px rgba(0,0,0,.6);
+    margin-bottom:12px; pointer-events:auto;
+  }
+  .pl-label .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--pink); box-shadow:0 0 12px var(--pink);
+    animation:live 1.8s ease-in-out infinite;
   }
   .pl-body{
     position:relative; overflow:hidden;
-    background:linear-gradient(120deg, rgba(20,10,38,.62), rgba(24,12,44,.46));
-    backdrop-filter:blur(16px);
-    border:1px solid rgba(255,255,255,.22);
-    border-radius:24px; padding:10px;
-    box-shadow:0 18px 46px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.04), inset 0 1px 0 rgba(255,255,255,.14);
+    border-radius:26px; padding:18px 20px 14px;
+    background:linear-gradient(165deg, rgba(30,16,54,.78), rgba(15,8,30,.58) 55%, rgba(22,11,40,.66));
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 26px 64px rgba(5,2,14,.6), 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.14);
+    backdrop-filter:blur(22px) saturate(1.4);
     pointer-events:auto;
     transition:border-color .3s ease, box-shadow .3s ease;
   }
+  .pl-body::before{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(120% 60% at 50% -20%, rgba(255,61,129,.16), transparent 60%);
+  }
+  .pl-body::after{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    box-shadow:inset 0 -1px 0 rgba(255,255,255,.08);
+  }
   .pl-body:hover{
-    border-color:rgba(255,200,87,.45);
-    box-shadow:0 22px 54px rgba(0,0,0,.5), 0 0 30px rgba(255,61,129,.16), inset 0 1px 0 rgba(255,255,255,.16);
+    border-color:rgba(255,200,87,.5);
+    box-shadow:0 30px 70px rgba(5,2,14,.66), 0 0 44px rgba(255,61,129,.18), 0 0 0 1px rgba(255,255,255,.06);
   }
 
-  /* ---------- PLAYLIST CONTROLS ---------- */
-  .cp-controls{display:flex; align-items:center; justify-content:center; gap:14px; padding:12px 0 2px;}
-  .cp-btn{width:44px; height:44px; border-radius:50%; border:1px solid rgba(255,255,255,.25);
-    background:rgba(255,255,255,.07); color:var(--paper); cursor:pointer;
-    display:grid; place-items:center; transition:.2s;}
-  .cp-btn:hover{background:rgba(255,200,87,.18); border-color:var(--amber); color:var(--amber);}
-  .cp-stop{color:#fff; border-color:rgba(255,90,61,.5); background:rgba(255,90,61,.15);}
-  .cp-stop:hover{background:rgba(255,90,61,.3); border-color:var(--red); color:#fff;}
-  .cp-play{width:58px; height:58px; background:linear-gradient(140deg, var(--pink), var(--purple));
-    border:none; color:#fff; box-shadow:0 6px 20px rgba(255,61,129,.45);}
-  .cp-play:hover{transform:scale(1.06); color:#fff; background:linear-gradient(140deg, #ff5d96, var(--purple));}
+  /* now playing */
+  .np{position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; padding:2px 0 6px;}
+  .np-title{
+    font-size:clamp(15px, 1.8vw, 18px); font-weight:700; color:#fff; letter-spacing:.02em;
+    max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .np-artist{
+    font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
+    color:rgba(255,246,233,.62); margin-top:5px;
+    max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .np-artist.err{color:var(--red);}
+  .seek{display:flex; align-items:center; gap:10px; padding:8px 2px 2px;}
+  .np-time{font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,246,233,.7); min-width:36px; text-align:center;}
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:6px;
+    border-radius:99px; outline:none; cursor:pointer;
+    background:linear-gradient(to right, var(--pink) var(--fill,0%), rgba(255,255,255,.16) var(--fill,0%));
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:15px; height:15px; border-radius:50%;
+    background:var(--amber); border:2px solid #fff;
+    box-shadow:0 0 0 3px rgba(255,200,87,.25), 0 0 14px rgba(255,200,87,.8);
+    transition:transform .2s var(--ease);
+  }
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18);}
+  input[type=range]::-moz-range-thumb{
+    width:15px; height:15px; border-radius:50%;
+    background:var(--amber); border:2px solid #fff;
+    box-shadow:0 0 0 3px rgba(255,200,87,.25), 0 0 14px rgba(255,200,87,.8);
+  }
+
+  /* controls */
+  .cp-controls{display:flex; align-items:center; justify-content:center; gap:16px; padding:12px 0 6px;}
+  .cp-btn{
+    width:46px; height:46px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(255,255,255,.06); color:var(--paper); cursor:pointer;
+    display:grid; place-items:center;
+    transition:transform .2s var(--ease), background .2s ease, border-color .2s ease, color .2s ease;
+    position:relative;
+  }
+  .cp-btn:hover{transform:translateY(-2px); background:rgba(255,200,87,.16); border-color:var(--amber); color:var(--amber);}
+  .cp-btn:active{transform:translateY(0) scale(.94);}
+  .cp-stop{color:#fff; border-color:rgba(255,90,61,.55); background:rgba(255,90,61,.14);}
+  .cp-stop:hover{background:rgba(255,90,61,.28); border-color:var(--red); color:#fff;}
+  .cp-play{
+    width:60px; height:60px;
+    background:linear-gradient(140deg, var(--pink), var(--purple));
+    border:none; color:#fff;
+    box-shadow:0 8px 24px rgba(255,61,129,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .cp-play::after{
+    content:''; position:absolute; inset:-4px; border-radius:50%;
+    border:1px solid rgba(255,61,129,.35); opacity:0;
+    transition:opacity .25s var(--ease);
+  }
+  .cp-play:hover{transform:translateY(-2px) scale(1.04); color:#fff; background:linear-gradient(140deg, #ff5d96, var(--purple));}
+  .cp-play:hover::after{opacity:1;}
   .cp-stop svg,.cp-btn svg{display:block;}
 
-  /* ---------- SONG LIBRARY PLAYER ---------- */
-  .np{padding:6px 6px 4px;}
-  .np-title{font-size:16px; font-weight:700; color:#fff; letter-spacing:.01em;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .np-artist{font-size:11px; letter-spacing:.18em; text-transform:uppercase;
-    color:rgba(255,246,233,.6); margin-top:4px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .np-artist.err{color:var(--red);}
-  .seek{display:flex; align-items:center; gap:10px; padding:12px 4px 2px;}
-  .np-time{font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,246,233,.7);
-    min-width:34px; text-align:center;}
-  .seek input{flex:1;}
-  input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:4px;
-    border-radius:99px; outline:none; cursor:pointer;
-    background:linear-gradient(to right, var(--pink) var(--fill,0%), rgba(255,255,255,.18) var(--fill,0%));}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none;
-    width:14px; height:14px; border-radius:50%;
-    background:var(--amber); border:2px solid rgba(255,255,255,.85);
-    box-shadow:0 0 10px rgba(255,200,87,.7);}
-  input[type=range]::-moz-range-thumb{width:14px; height:14px; border-radius:50%;
-    background:var(--amber); border:2px solid rgba(255,255,255,.85);
-    box-shadow:0 0 10px rgba(255,200,87,.7);}
+  /* queue */
   .cp-queue{display:flex; gap:8px; overflow-x:auto; padding:10px 2px 2px; scrollbar-width:none;}
   .cp-queue::-webkit-scrollbar{display:none;}
-  .q-chip{flex:0 0 auto; max-width:150px; font-size:11px; letter-spacing:.04em; padding:5px 11px;
-    border-radius:99px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.05);
-    color:rgba(255,246,233,.8); cursor:pointer; font-family:inherit;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:.2s;}
-  .q-chip:hover{color:var(--amber); border-color:var(--amber);}
-  .q-chip.on{background:rgba(255,61,129,.25); border-color:var(--pink); color:#fff;}
-  .q-chip.broken{border-color:var(--red); color:var(--red);}
+  .q-chip{
+    flex:0 0 auto; max-width:160px; font-size:11px; letter-spacing:.04em; padding:6px 12px;
+    border-radius:99px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.05);
+    color:rgba(255,246,233,.82); cursor:pointer; font-family:inherit;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:transform .2s var(--ease), background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .q-chip:hover{transform:translateY(-1px); color:var(--amber); border-color:var(--amber);}
+  .q-chip.on{background:linear-gradient(120deg, rgba(255,61,129,.3), rgba(155,92,255,.22)); border-color:var(--pink); color:#fff;}
+  .q-chip.broken{border-color:var(--red); color:var(--red); text-decoration:line-through;}
   .q-chip.loading{border-style:dashed; border-color:var(--amber); color:var(--amber);}
   .spin{display:inline-block; width:20px; height:20px; border-radius:50%;
     border:3px solid rgba(255,255,255,.3); border-top-color:var(--amber);
     animation:sp .7s linear infinite;}
   @keyframes sp{to{transform:rotate(360deg)}}
 
-  /* ---------- MISC UI ---------- */
-  .credit{
-    position:absolute; left:clamp(16px,2.5vw,28px); bottom:22px; z-index:7;
-    font-size:11px; letter-spacing:.06em; color:#ffe; opacity:.8; text-shadow:0 2px 8px rgba(0,0,0,.6);
-    font-family:'Patrick Hand',cursive; font-size:14px;
+  /* ---------- UPLOADER ---------- */
+  .uploader{width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .up-toggle{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:inherit; font-size:11px; font-weight:700;
+    letter-spacing:.3em; text-transform:uppercase; color:var(--amber);
+    background:rgba(16,9,32,.45); border:1px solid rgba(255,255,255,.18);
+    border-radius:99px; padding:10px 20px; cursor:pointer;
+    backdrop-filter:blur(14px);
+    transition:transform .2s var(--ease), background .2s ease, border-color .2s ease, box-shadow .2s ease;
   }
-  .credit b{color:var(--amber); font-weight:400;}
+  .up-toggle-ico{display:block; width:13px; height:13px; flex:0 0 auto;
+    transition:transform .3s var(--ease);}
+  .up-toggle.on .up-toggle-ico{transform:rotate(45deg);}
+  .up-toggle:hover,.up-toggle.on{
+    transform:translateY(-1px);
+    border-color:var(--amber); background:rgba(255,200,87,.14);
+    box-shadow:0 10px 30px rgba(255,200,87,.12);
+  }
+  .up-panel{
+    width:100%; pointer-events:auto;
+    border-radius:22px; padding:16px;
+    display:flex; flex-direction:column; gap:12px;
+    background:linear-gradient(165deg, rgba(30,16,54,.78), rgba(15,8,30,.58));
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:0 24px 60px rgba(5,2,14,.55), 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.14);
+    backdrop-filter:blur(22px) saturate(1.4);
+  }
+  .up-panel[hidden]{display:none;}
+  .up-panel{animation:upOpen .3s var(--ease);}
+  @keyframes upOpen{from{opacity:0; transform:translateY(-8px);} to{opacity:1; transform:translateY(0);}}
+  .up-fields{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .up-file{
+    grid-column:1 / -1; display:block; text-align:left; font-size:12px;
+    letter-spacing:.04em; color:rgba(255,246,233,.85); cursor:pointer;
+    border:1px dashed rgba(255,255,255,.3); border-radius:12px;
+    padding:10px 12px; background:rgba(255,255,255,.04);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .up-file:hover{border-color:var(--amber); color:var(--amber);}
+  .up-file.picked{border-color:var(--pink); color:#fff; border-style:solid;}
+  .up-inp{
+    font-family:inherit; font-size:13px; color:#fff;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18);
+    border-radius:10px; padding:9px 12px; outline:none;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .up-inp::placeholder{color:rgba(255,246,233,.45);}
+  .up-inp:focus{border-color:var(--amber); background:rgba(255,255,255,.09);}
+  .up-actions{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .up-submit{
+    font-family:inherit; font-size:12px; font-weight:700;
+    letter-spacing:.22em; text-transform:uppercase; color:#fff;
+    background:linear-gradient(140deg, var(--pink), var(--purple));
+    border:none; border-radius:12px; padding:11px 22px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px; justify-content:center;
+    box-shadow:0 6px 18px rgba(255,61,129,.35), inset 0 1px 0 rgba(255,255,255,.2);
+    transition:transform .2s var(--ease), box-shadow .2s ease, opacity .2s ease;
+  }
+  .up-submit:hover:not(:disabled){transform:translateY(-1px) scale(1.03); box-shadow:0 10px 26px rgba(255,61,129,.45);}
+  .up-submit:active:not(:disabled){transform:scale(.97);}
+  .up-submit:disabled{opacity:.55; cursor:default; transform:none;}
+  .up-spin{width:13px; height:13px; border-width:2px;}
+  .up-msg{font-size:12px; letter-spacing:.04em; min-height:16px; text-align:left;}
+  .up-msg.ok{color:var(--mint);}
+  .up-msg.err{color:var(--red);}
 
+  /* ---------- MISC UI ---------- */
   /* cursor */
   .cursor-dot{position:fixed; left:0; top:0; z-index:99; width:8px; height:8px; border-radius:50%;
     background:var(--pink); box-shadow:0 0 12px var(--pink), 0 0 24px rgba(255,61,129,.6);
     pointer-events:none; transform:translate(-50%,-50%);}
   .cursor-ring{position:fixed; left:0; top:0; z-index:98; width:36px; height:36px; border-radius:50%;
     border:1.5px solid rgba(255,246,233,.65); pointer-events:none;
-    transform:translate(-50%,-50%); transition:width .25s ease, height .25s ease, border-color .25s, background .25s;}
+    transform:translate(-50%,-50%);
+    transition:width .25s ease, height .25s ease, border-color .25s, background .25s;}
   body.hovering .cursor-ring{width:56px; height:56px; border-color:var(--amber); background:rgba(255,61,129,.08);}
 
-  /* ---------- UPLOADER ---------- */
-  .uploader{
-    position:absolute; left:50%; bottom:330px; transform:translateX(-50%);
-    z-index:7; width:min(560px, 93vw); text-align:center;
-    display:flex; flex-direction:column; align-items:center; gap:10px;
-  }
-  .up-toggle{
-    font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700;
-    letter-spacing:.3em; text-transform:uppercase; color:var(--amber);
-    background:rgba(20,10,38,.5); border:1px solid rgba(255,255,255,.22);
-    border-radius:99px; padding:8px 18px; cursor:pointer; transition:.2s;
-    backdrop-filter:blur(10px);
-  }
-  .up-toggle:hover,.up-toggle.on{border-color:var(--amber); background:rgba(255,200,87,.12);}
-  .up-panel{
-    width:100%; pointer-events:auto;
-    background:linear-gradient(120deg, rgba(20,10,38,.62), rgba(24,12,44,.46));
-    backdrop-filter:blur(16px);
-    border:1px solid rgba(255,255,255,.22); border-radius:20px;
-    padding:14px; box-shadow:0 18px 46px rgba(0,0,0,.45);
-    display:flex; flex-direction:column; gap:10px;
-  }
-  .up-fields{display:flex; flex-wrap:wrap; gap:8px;}
-  .up-file{
-    flex:1 1 100%; display:block; text-align:left; font-size:12px;
-    letter-spacing:.04em; color:rgba(255,246,233,.85); cursor:pointer;
-    border:1px dashed rgba(255,255,255,.3); border-radius:12px;
-    padding:10px 12px; background:rgba(255,255,255,.04); transition:.2s;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .up-file:hover{border-color:var(--amber); color:var(--amber);}
-  .up-file.picked{border-color:var(--pink); color:#fff; border-style:solid;}
-  .up-inp{
-    flex:1 1 calc(50% - 4px); min-width:150px;
-    font-family:'Space Grotesk',sans-serif; font-size:13px; color:#fff;
-    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18);
-    border-radius:10px; padding:9px 12px; outline:none; transition:.2s;
-  }
-  .up-inp::placeholder{color:rgba(255,246,233,.45);}
-  .up-inp:focus{border-color:var(--amber);}
-  .up-actions{display:flex; align-items:center; gap:10px;}
-  .up-submit{
-    font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700;
-    letter-spacing:.22em; text-transform:uppercase; color:#fff;
-    background:linear-gradient(140deg, var(--pink), var(--purple));
-    border:none; border-radius:12px; padding:11px 22px; cursor:pointer;
-    transition:.2s; box-shadow:0 6px 18px rgba(255,61,129,.35);
-    display:inline-flex; align-items:center; gap:8px; justify-content:center;
-  }
-  .up-submit:hover:not(:disabled){transform:scale(1.03);}
-  .up-submit:disabled{opacity:.55; cursor:default; transform:none;}
-  .up-spin{width:13px; height:13px; border-width:2px;}
-  .up-msg{font-size:12px; letter-spacing:.04em; min-height:16px; text-align:left;}
-  .up-msg.ok{color:#7dffb0;}
-  .up-msg.err{color:var(--red);}
+  /* accessibility */
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px; border-radius:6px;}
 
   /* ---------- RESPONSIVE ---------- */
-  @media (max-width:980px){
-    .bgword{font-size:90vw;}
+  @media (max-width:760px){
+    header{padding:16px 18px;}
+    .bgword{font-size:130vw;}
+    .doodle,.confetti{opacity:.7;}
+    .pl-body{padding:16px 14px 12px; border-radius:22px;}
+    .cp-controls{gap:12px;}
+    .cp-btn{width:42px; height:42px;}
+    .cp-play{width:54px; height:54px;}
+    .up-fields{grid-template-columns:1fr;}
+    .people-line{letter-spacing:.26em;}
+    .session-pill{font-size:10px; letter-spacing:.2em; padding:8px 14px;}
   }
-  @media (max-width:640px){
-    .people-line{bottom:230px; font-size:16px; letter-spacing:.24em;}
-    .player{width:min(420px, 94vw);}
-    .doodle{opacity:.75;}
-    .clock{font-size:18px;}
-    .uploader{bottom:300px;}
+  @media (max-width:420px){
+    .session-pill .dot{display:none;}
+    .pl-label{letter-spacing:.22em; font-size:11px;}
+  }
+  @media (max-height:640px){
+    main{justify-content:flex-start; padding-top:52px;}
+    .sub{margin-top:12px;}
+    .people-line{margin-top:16px;}
+    .deck{margin-bottom:10px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .grain,.doodle svg,.confetti,.pl-glow,.spin{animation:none;}
+    .l,.cp-btn,.cp-play,.q-chip,.up-toggle,.up-submit,.cursor-ring{transition:none;}
   }
 </style>
 </head>
@@ -319,46 +435,45 @@
 
   <!-- header -->
   <header>
-    <small style="font-family:'Patrick Hand',cursive; font-size:13px; letter-spacing:.24em; opacity:.8; text-transform:uppercase;">AUG 13 · <span id="sessionLabel">NIGHT</span> SESSION · 18:00</small>
+    <div class="session-pill"><span class="dot"></span>AUG 13 · <span id="sessionLabel">NIGHT</span> SESSION · 18:00</div>
     <div class="clock" id="clock">--:--<span class="date" id="dateline">--</span></div>
   </header>
 
   <!-- doodle layer -->
-  <div class="doodle" style="left:12vw; top:33%; transform:rotate(-14deg);" data-depth="42">
+  <div class="doodle" style="left:12vw; top:32%; transform:rotate(-14deg) translate(var(--px,0), var(--py,0));" data-depth="42">
     <svg width="34" height="34" viewBox="0 0 24 24"><path d="M9 18V5l10-2v12" fill="none" stroke="#ffc857" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="#ffc857"/><circle cx="16.5" cy="15" r="2.5" fill="#ffc857"/></svg>
   </div>
-  <div class="doodle" style="right:15vw; top:26%; transform:rotate(12deg);" data-depth="30">
+  <div class="doodle" style="right:15vw; top:24%; transform:rotate(12deg) translate(var(--px,0), var(--py,0));" data-depth="30">
     <svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 2l2.5 6.2L21 9l-4.6 4 1.4 6.6L12 16.4 6.2 19.6l1.4-6.6L3 9l6.5-.8z" fill="none" stroke="#ff3d81" stroke-width="1.8" stroke-linejoin="round"/></svg>
   </div>
-  <div class="doodle" style="left:9vw; bottom:36%; transform:rotate(8deg);" data-depth="26">
+  <div class="doodle" style="left:9vw; bottom:36%; transform:rotate(8deg) translate(var(--px,0), var(--py,0));" data-depth="26">
     <svg width="26" height="34" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z" fill="#ffc857" stroke="#ff5a3d" stroke-width="1.6" stroke-linejoin="round"/></svg>
   </div>
-  <div class="doodle" style="left:36%; top:48%; transform:rotate(-6deg);" data-depth="22">
-    <svg width="70" height="30" viewBox="0 0 60 30"><path d="M4 22 C 16 4, 44 4, 56 12" fill="none" stroke="#fff6e9" stroke-width="2.6" stroke-linecap="round"/><path d="M48 6 L57 13 L48 20" fill="none" stroke="#fff6e9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </div>
-  <div class="doodle" style="right:21vw; top:11%; transform:rotate(-8deg);" data-depth="16">
+  <div class="doodle" style="right:21vw; top:10%; transform:rotate(-8deg) translate(var(--px,0), var(--py,0));" data-depth="16">
     <svg width="40" height="40" viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="15" ry="13" fill="none" stroke="#9b5cff" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="1 6"/></svg>
   </div>
-  <div class="doodle" style="left:16%; bottom:30%; transform:rotate(-10deg);" data-depth="24">
+  <div class="doodle" style="left:16%; bottom:28%; transform:rotate(-10deg) translate(var(--px,0), var(--py,0));" data-depth="24">
     <svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#ff3d81" stroke-width="2"/><path d="M8.5 10h.01M15.5 10h.01" stroke="#ff3d81" stroke-width="2.6" stroke-linecap="round"/><path d="M8.5 13.5c1 1.4 2.3 2 3.5 2s2.5-.6 3.5-2" fill="none" stroke="#ff3d81" stroke-width="2" stroke-linecap="round"/></svg>
   </div>
-  <div class="doodle" style="right:9vw; bottom:24%; transform:rotate(16deg);" data-depth="20">
+  <div class="doodle" style="right:9vw; bottom:22%; transform:rotate(16deg) translate(var(--px,0), var(--py,0));" data-depth="20">
     <svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="#fff6e9" stroke-width="2.6" stroke-linecap="round" opacity=".8"/></svg>
   </div>
 
   <!-- confetti -->
-  <div class="confetti" style="left:8%; top:22%; background:var(--pink); animation-duration:5.4s;"></div>
-  <div class="confetti" style="left:16%; top:12%; background:var(--amber); animation-duration:6.8s; animation-delay:.6s;"></div>
-  <div class="confetti" style="left:28%; top:16%; background:var(--blue); animation-duration:5s; animation-delay:1.1s;"></div>
-  <div class="confetti" style="left:42%; top:10%; background:var(--purple); animation-duration:7.2s; animation-delay:.3s;"></div>
-  <div class="confetti" style="left:55%; top:20%; background:var(--pink); animation-duration:6s; animation-delay:1.6s;"></div>
-  <div class="confetti" style="left:66%; top:13%; background:var(--amber); animation-duration:5.6s; animation-delay:.9s;"></div>
-  <div class="confetti" style="left:78%; top:18%; background:var(--red); animation-duration:6.4s; animation-delay:.2s;"></div>
-  <div class="confetti" style="left:88%; top:14%; background:var(--purple); animation-duration:5.2s; animation-delay:1.4s;"></div>
-  <div class="confetti" style="left:24%; top:74%; background:var(--blue); animation-duration:6.6s; animation-delay:.5s;"></div>
-  <div class="confetti" style="left:72%; top:78%; background:var(--pink); animation-duration:5.8s; animation-delay:1.2s;"></div>
-  <div class="confetti" style="left:48%; top:86%; background:var(--amber); animation-duration:7s; animation-delay:.8s;"></div>
-  <div class="confetti" style="left:90%; top:62%; background:var(--red); animation-duration:6.2s; animation-delay:1.7s;"></div>
+  <div class="confetti-layer">
+    <div class="confetti" style="left:8%; top:22%; background:var(--pink); animation-duration:5.4s;"></div>
+    <div class="confetti" style="left:16%; top:12%; background:var(--amber); animation-duration:6.8s; animation-delay:.6s;"></div>
+    <div class="confetti" style="left:28%; top:16%; background:var(--blue); animation-duration:5s; animation-delay:1.1s;"></div>
+    <div class="confetti" style="left:42%; top:10%; background:var(--purple); animation-duration:7.2s; animation-delay:.3s;"></div>
+    <div class="confetti" style="left:55%; top:20%; background:var(--pink); animation-duration:6s; animation-delay:1.6s;"></div>
+    <div class="confetti" style="left:66%; top:13%; background:var(--amber); animation-duration:5.6s; animation-delay:.9s;"></div>
+    <div class="confetti" style="left:78%; top:18%; background:var(--red); animation-duration:6.4s; animation-delay:.2s;"></div>
+    <div class="confetti" style="left:88%; top:14%; background:var(--purple); animation-duration:5.2s; animation-delay:1.4s;"></div>
+    <div class="confetti" style="left:24%; top:74%; background:var(--blue); animation-duration:6.6s; animation-delay:.5s;"></div>
+    <div class="confetti" style="left:72%; top:78%; background:var(--pink); animation-duration:5.8s; animation-delay:1.2s;"></div>
+    <div class="confetti" style="left:48%; top:86%; background:var(--amber); animation-duration:7s; animation-delay:.8s;"></div>
+    <div class="confetti" style="left:90%; top:62%; background:var(--red); animation-duration:6.2s; animation-delay:1.7s;"></div>
+  </div>
 
   <!-- headline -->
   <main>
@@ -375,61 +490,61 @@
     <p class="sub">This is where <i>we</i> come alive.</p>
   </main>
 
-  <div class="people-line" data-depth="18">3K+ PEOPLE. ONE EXPERIENCE.</div>
-
-  <!-- add a song -->
-  <div class="uploader">
-    <button class="up-toggle" id="upToggle" type="button" data-hover>+ ADD A SONG</button>
-    <div class="up-panel" id="upPanel" hidden>
-      <div class="up-fields">
-        <label class="up-file" id="upFileLabel" for="upFile" data-hover>Choose an mp3…</label>
-        <input type="file" id="upFile" accept="audio/mp3,audio/mpeg" hidden>
-        <input class="up-inp" type="text" id="upTitle" placeholder="Title (optional)" autocomplete="off">
-        <input class="up-inp" type="text" id="upArtist" placeholder="Artist (optional)" autocomplete="off">
-        <input class="up-inp" type="text" id="upName" placeholder="Your name" autocomplete="off">
-      </div>
-      <div class="up-actions">
-        <button class="up-submit" id="upSubmit" type="button" data-hover>Upload</button>
-        <div class="up-msg" id="upMsg" role="status"></div>
+  <!-- bottom deck: player + uploader -->
+  <div class="deck">
+    <!-- custom music player -->
+    <div class="player">
+      <div class="pl-glow"></div>
+      <div class="pl-body" data-hover>
+        <div class="np">
+          <div class="np-title" id="npTitle">Loading the tape…</div>
+          <div class="np-artist" id="npArtist"></div>
+        </div>
+        <div class="seek">
+          <span class="np-time" id="npCur">0:00</span>
+          <input type="range" id="seek" min="0" max="100" value="0" aria-label="Seek">
+          <span class="np-time" id="npDur">0:00</span>
+        </div>
+        <div class="cp-controls">
+          <button class="cp-btn" id="btnPrev" aria-label="Previous">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+          </button>
+          <button class="cp-btn cp-stop" id="btnStop" aria-label="Stop">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+          </button>
+          <button class="cp-btn cp-play" id="btnPlay" aria-label="Play or Pause">
+            <svg id="icoPlay" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="cp-btn" id="btnNext" aria-label="Next">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
+          </button>
+        </div>
+        <div class="cp-queue" id="queue"></div>
       </div>
     </div>
-  </div>
 
-  <!-- custom music player -->
-  <div class="player">
-    <div class="pl-glow"></div>
-    <div class="pl-label">NOW PLAYING — THE SOUND OF THE NIGHT</div>
-    <div class="pl-body" data-hover>
-      <div class="np">
-        <div class="np-title" id="npTitle">Loading the tape…</div>
-        <div class="np-artist" id="npArtist"></div>
+    <div class="uploader">
+      <button class="up-toggle" id="upToggle" type="button" data-hover>
+        <svg class="up-toggle-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="up-toggle-txt">ADD A SONG</span>
+      </button>
+      <div class="up-panel" id="upPanel" hidden>
+        <div class="up-fields">
+          <label class="up-file" id="upFileLabel" for="upFile" data-hover>Choose an mp3…</label>
+          <input type="file" id="upFile" accept="audio/mp3,audio/mpeg" hidden>
+          <input class="up-inp" type="text" id="upTitle" placeholder="Title (optional)" autocomplete="off">
+          <input class="up-inp" type="text" id="upArtist" placeholder="Artist (optional)" autocomplete="off">
+          <input class="up-inp" type="text" id="upName" placeholder="Your name" autocomplete="off">
+        </div>
+        <div class="up-actions">
+          <button class="up-submit" id="upSubmit" type="button" data-hover>Upload</button>
+          <div class="up-msg" id="upMsg" role="status"></div>
+        </div>
       </div>
-      <div class="seek">
-        <span class="np-time" id="npCur">0:00</span>
-        <input type="range" id="seek" min="0" max="100" value="0" aria-label="Seek">
-        <span class="np-time" id="npDur">0:00</span>
-      </div>
-      <div class="cp-controls">
-        <button class="cp-btn" id="btnPrev" aria-label="Previous">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
-        </button>
-        <button class="cp-btn cp-stop" id="btnStop" aria-label="Stop">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
-        </button>
-        <button class="cp-btn cp-play" id="btnPlay" aria-label="Play or Pause">
-          <svg id="icoPlay" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-        <button class="cp-btn" id="btnNext" aria-label="Next">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
-        </button>
-      </div>
-      <div class="cp-queue" id="queue"></div>
     </div>
   </div>
 
   <!-- interaction cues -->
-  <div class="credit">made by <b>Purva Patil</b></div>
-
   <div class="cursor-dot" id="cd"></div>
   <div class="cursor-ring" id="cr"></div>
 
