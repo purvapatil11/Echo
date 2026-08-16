@@ -10,7 +10,6 @@
   const upFile = $('upFile');
   const upFileLabel = $('upFileLabel');
   const upTitle = $('upTitle');
-  const upArtist = $('upArtist');
   const upName = $('upName');
   const upSubmit = $('upSubmit');
   const upMsg = $('upMsg');
@@ -52,7 +51,7 @@
     upFileLabel.classList.toggle('picked', !!f);
   });
 
-  [upTitle, upArtist, upName].forEach(el => el.addEventListener('input', clearMsg));
+  [upTitle, upName].forEach(el => el.addEventListener('input', clearMsg));
 
   upSubmit.addEventListener('click', async () => {
     if (busy) return;
@@ -60,7 +59,6 @@
 
     const file = upFile.files && upFile.files[0];
     const title = upTitle.value.trim();
-    const artist = upArtist.value.trim();
     const name = upName.value.trim();
 
     if (!file) return showMsg('Pick an mp3 file to upload.', 'err');
@@ -91,7 +89,6 @@
 
       const { error: insErr } = await sb.from('songs').insert({
         title: title || titleFromFile(file.name),
-        artist: artist || null,
         storage_path: publicUrl,
         added_by: name
       });
@@ -101,7 +98,6 @@
       upFileLabel.textContent = 'Choose an mp3…';
       upFileLabel.classList.remove('picked');
       upTitle.value = '';
-      upArtist.value = '';
       showMsg('Uploaded — it should appear in the tape now.', 'ok');
     } catch (err) {
       console.error('Upload failed:', err);

@@ -8,6 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Patrick+Hand&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  @font-face{
+    font-family:'King Jack';
+    src:url('assests/King Jack Style.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
   :root{
     --paper:#fff6e9;
     --pink:#ff3d81;
@@ -87,6 +92,7 @@
     padding:24px 30px;
     pointer-events:none;
   }
+  .head-right{display:flex; align-items:center; gap:14px;}
   .clock{font-size:22px; font-weight:600; letter-spacing:.08em; text-align:right; text-shadow:0 2px 10px rgba(0,0,0,.5);}
   .clock .date{display:block; font-size:10px; opacity:.7; font-weight:500; letter-spacing:.3em; text-transform:uppercase; margin-top:3px;}
 
@@ -120,9 +126,9 @@
     display:inline-block; text-align:center;
   }
   .lrow{display:block; white-space:nowrap;}
-  .lrow.w1{font-size:clamp(38px, 7.2vw, 86px); letter-spacing:.08em; transform:skewX(-3deg);}
-  .lrow.w2{font-size:clamp(72px, 14.5vw, 176px); letter-spacing:.02em; margin-top:.06em; transform:skewX(-2deg);}
-  .l{display:inline-block; transform:rotate(var(--r,0deg)) translateY(var(--y,0));}
+  .lrow.w1{font-size:clamp(38px, 7.2vw, 86px); letter-spacing:.08em;}
+  .lrow.w2{font-size:clamp(72px, 14.5vw, 176px); letter-spacing:.02em; margin-top:.06em;}
+  .l{display:inline-block;}
   .sub{
     margin-top:26px; font-size:clamp(13px,1.5vw,17px); font-weight:600;
     letter-spacing:.14em; text-transform:uppercase; color:#ffe; opacity:.95;
@@ -140,7 +146,7 @@
 
   /* ---------- SPOTIFY PLAYER ---------- */
   .player{
-    position:absolute; left:50%; bottom:70px; transform:translateX(-50%);
+    position:absolute; left:50%; bottom:150px; transform:translateX(-50%);
     z-index:7; width:min(560px, 93vw); pointer-events:none;
   }
   .pl-glow{
@@ -223,13 +229,6 @@
   @keyframes sp{to{transform:rotate(360deg)}}
 
   /* ---------- MISC UI ---------- */
-  .credit{
-    position:absolute; left:clamp(16px,2.5vw,28px); bottom:22px; z-index:7;
-    font-size:11px; letter-spacing:.06em; color:#ffe; opacity:.8; text-shadow:0 2px 8px rgba(0,0,0,.6);
-    font-family:'Patrick Hand',cursive; font-size:14px;
-  }
-  .credit b{color:var(--amber); font-weight:400;}
-
   /* cursor */
   .cursor-dot{position:fixed; left:0; top:0; z-index:99; width:8px; height:8px; border-radius:50%;
     background:var(--pink); box-shadow:0 0 12px var(--pink), 0 0 24px rgba(255,61,129,.6);
@@ -241,41 +240,43 @@
 
   /* ---------- UPLOADER ---------- */
   .uploader{
-    position:absolute; left:50%; bottom:330px; transform:translateX(-50%);
-    z-index:7; width:min(560px, 93vw); text-align:center;
-    display:flex; flex-direction:column; align-items:center; gap:10px;
+    position:relative; z-index:9; text-align:center;
   }
   .up-toggle{
     font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700;
     letter-spacing:.3em; text-transform:uppercase; color:var(--amber);
     background:rgba(20,10,38,.5); border:1px solid rgba(255,255,255,.22);
     border-radius:99px; padding:8px 18px; cursor:pointer; transition:.2s;
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px); pointer-events:auto;
   }
   .up-toggle:hover,.up-toggle.on{border-color:var(--amber); background:rgba(255,200,87,.12);}
+  .up-panel[hidden]{display:none;}
   .up-panel{
-    width:100%; pointer-events:auto;
+    position:absolute; right:0; top:calc(100% + 12px);
+    width:min(420px, 82vw); pointer-events:auto;
     background:linear-gradient(120deg, rgba(20,10,38,.62), rgba(24,12,44,.46));
     backdrop-filter:blur(16px);
     border:1px solid rgba(255,255,255,.22); border-radius:20px;
-    padding:14px; box-shadow:0 18px 46px rgba(0,0,0,.45);
-    display:flex; flex-direction:column; gap:10px;
+    padding:18px; box-shadow:0 18px 46px rgba(0,0,0,.45);
+    display:flex; flex-direction:column; gap:12px;
+    animation:upOpen .25s ease;
   }
-  .up-fields{display:flex; flex-wrap:wrap; gap:8px;}
+  @keyframes upOpen{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);}}
+  .up-fields{display:flex; flex-wrap:wrap; gap:10px;}
   .up-file{
-    flex:1 1 100%; display:block; text-align:left; font-size:12px;
+    flex:1 1 100%; display:block; text-align:left; font-size:13px;
     letter-spacing:.04em; color:rgba(255,246,233,.85); cursor:pointer;
     border:1px dashed rgba(255,255,255,.3); border-radius:12px;
-    padding:10px 12px; background:rgba(255,255,255,.04); transition:.2s;
+    padding:11px 14px; background:rgba(255,255,255,.04); transition:.2s;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .up-file:hover{border-color:var(--amber); color:var(--amber);}
   .up-file.picked{border-color:var(--pink); color:#fff; border-style:solid;}
   .up-inp{
-    flex:1 1 calc(50% - 4px); min-width:150px;
-    font-family:'Space Grotesk',sans-serif; font-size:13px; color:#fff;
+    flex:1 1 calc(50% - 5px); min-width:150px;
+    font-family:'Space Grotesk',sans-serif; font-size:14px; color:#fff;
     background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18);
-    border-radius:10px; padding:9px 12px; outline:none; transition:.2s;
+    border-radius:10px; padding:11px 14px; outline:none; transition:.2s;
   }
   .up-inp::placeholder{color:rgba(255,246,233,.45);}
   .up-inp:focus{border-color:var(--amber);}
@@ -284,7 +285,7 @@
     font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700;
     letter-spacing:.22em; text-transform:uppercase; color:#fff;
     background:linear-gradient(140deg, var(--pink), var(--purple));
-    border:none; border-radius:12px; padding:11px 22px; cursor:pointer;
+    border:none; border-radius:12px; padding:12px 24px; cursor:pointer;
     transition:.2s; box-shadow:0 6px 18px rgba(255,61,129,.35);
     display:inline-flex; align-items:center; gap:8px; justify-content:center;
   }
@@ -304,7 +305,6 @@
     .player{width:min(420px, 94vw);}
     .doodle{opacity:.75;}
     .clock{font-size:18px;}
-    .uploader{bottom:300px;}
   }
 </style>
 </head>
@@ -320,7 +320,24 @@
   <!-- header -->
   <header>
     <small style="font-family:'Patrick Hand',cursive; font-size:13px; letter-spacing:.24em; opacity:.8; text-transform:uppercase;">AUG 13 · <span id="sessionLabel">NIGHT</span> SESSION · 18:00</small>
-    <div class="clock" id="clock">--:--<span class="date" id="dateline">--</span></div>
+    <div class="head-right">
+      <div class="clock" id="clock">--:--<span class="date" id="dateline">--</span></div>
+      <div class="uploader">
+        <button class="up-toggle" id="upToggle" type="button" data-hover>+ ADD A SONG</button>
+        <div class="up-panel" id="upPanel" hidden>
+          <div class="up-fields">
+            <label class="up-file" id="upFileLabel" for="upFile" data-hover>Choose an mp3…</label>
+            <input type="file" id="upFile" accept="audio/mp3,audio/mpeg" hidden>
+            <input class="up-inp" type="text" id="upTitle" placeholder="Title (optional)" autocomplete="off">
+            <input class="up-inp" type="text" id="upName" placeholder="Your name" autocomplete="off">
+          </div>
+          <div class="up-actions">
+            <button class="up-submit" id="upSubmit" type="button" data-hover>Upload</button>
+            <div class="up-msg" id="upMsg" role="status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- doodle layer -->
@@ -332,9 +349,6 @@
   </div>
   <div class="doodle" style="left:9vw; bottom:36%; transform:rotate(8deg);" data-depth="26">
     <svg width="26" height="34" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z" fill="#ffc857" stroke="#ff5a3d" stroke-width="1.6" stroke-linejoin="round"/></svg>
-  </div>
-  <div class="doodle" style="left:36%; top:48%; transform:rotate(-6deg);" data-depth="22">
-    <svg width="70" height="30" viewBox="0 0 60 30"><path d="M4 22 C 16 4, 44 4, 56 12" fill="none" stroke="#fff6e9" stroke-width="2.6" stroke-linecap="round"/><path d="M48 6 L57 13 L48 20" fill="none" stroke="#fff6e9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
   <div class="doodle" style="right:21vw; top:11%; transform:rotate(-8deg);" data-depth="16">
     <svg width="40" height="40" viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="15" ry="13" fill="none" stroke="#9b5cff" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="1 6"/></svg>
@@ -377,28 +391,10 @@
 
   <div class="people-line" data-depth="18">3K+ PEOPLE. ONE EXPERIENCE.</div>
 
-  <!-- add a song -->
-  <div class="uploader">
-    <button class="up-toggle" id="upToggle" type="button" data-hover>+ ADD A SONG</button>
-    <div class="up-panel" id="upPanel" hidden>
-      <div class="up-fields">
-        <label class="up-file" id="upFileLabel" for="upFile" data-hover>Choose an mp3…</label>
-        <input type="file" id="upFile" accept="audio/mp3,audio/mpeg" hidden>
-        <input class="up-inp" type="text" id="upTitle" placeholder="Title (optional)" autocomplete="off">
-        <input class="up-inp" type="text" id="upArtist" placeholder="Artist (optional)" autocomplete="off">
-        <input class="up-inp" type="text" id="upName" placeholder="Your name" autocomplete="off">
-      </div>
-      <div class="up-actions">
-        <button class="up-submit" id="upSubmit" type="button" data-hover>Upload</button>
-        <div class="up-msg" id="upMsg" role="status"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- custom music player -->
   <div class="player">
     <div class="pl-glow"></div>
-    <div class="pl-label">NOW PLAYING — THE SOUND OF THE NIGHT</div>
+    <div class="pl-label">NOW PLAYING — THE SOUND OF THE TENET</div>
     <div class="pl-body" data-hover>
       <div class="np">
         <div class="np-title" id="npTitle">Loading the tape…</div>
@@ -428,8 +424,6 @@
   </div>
 
   <!-- interaction cues -->
-  <div class="credit">made by <b>Purva Patil</b></div>
-
   <div class="cursor-dot" id="cd"></div>
   <div class="cursor-ring" id="cr"></div>
 
