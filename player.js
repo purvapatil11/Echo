@@ -22,7 +22,8 @@
 
   const objectUrls = new Map();  // song id (or url) -> cached object URL
   const loadingIds = new Set();  // songs currently being fetched
-  const brokenIds = new Set();   // songs that failed to load/play
+  const brokenIds = new Set(JSON.parse(sessionStorage.getItem('tape-broken') || '[]'));  // songs that failed to load/play
+  const rememberBroken = () => sessionStorage.setItem('tape-broken', JSON.stringify([...brokenIds]));
 
   const icoPlay = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   const icoPause = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
@@ -123,11 +124,7 @@
         if (autoplay) playerAudio.play().catch(() => {});
         return;
       }
-      brokenIds.add(id);
-      if (i === current) {
-        setNP(song.title || 'Untitled', "Couldn't load this track");
-        npArtist.classList.add('err');
-      }
+      dropSong(i);
     } finally {
       loadingIds.delete(id);
       renderQueue();
@@ -193,10 +190,7 @@
   });
   playerAudio.addEventListener('error', () => {
     if (current != null) {
-      brokenIds.add(songId(library[current]));
-      npArtist.textContent = "Couldn't load this track";
-      npArtist.classList.add('err');
-      renderQueue();
+      dropSong(current);
     }
   });
   playerAudio.addEventListener('ended', () => {
@@ -241,6 +235,136 @@
     }
   }
 
+  function removeSongFromRow(row){
+    const id = row && row.id;
+    if (!id) return;
+    const idx = library.findIndex(s => s.id === id);
+    if (idx === -1) return;
+    library.splice(idx, 1);
+    const objUrl = objectUrls.get(id);
+    if (objUrl) URL.revokeObjectURL(objUrl);
+    objectUrls.delete(id);
+    loadingIds.delete(id);
+    brokenIds.delete(id);
+    if (current != null) {
+      if (current === idx) {
+        playerAudio.pause();
+        playerAudio.removeAttribute('src');
+        playerAudio.load();
+        if (library.length) {
+          current = Math.min(idx, library.length - 1);
+          loadSong(current, false);
+        } else {
+          current = null;
+          setNP('No songs on the tape yet — add one with “+ ADD A SONG” above.', '');
+        }
+      } else if (current > idx) {
+        current -= 1;
+      }
+    }
+    renderQueue();
+    syncPlayIcon();
+  }
+
+  function dropSong(i){
+    if (i < 0 || i >= library.length) return;
+    const song = library[i];
+    const id = songId(song);
+    if (id) { brokenIds.add(id); rememberBroken(); }
+    library.splice(i, 1);
+    const objUrl = objectUrls.get(id);
+    if (objUrl) URL.revokeObjectURL(objUrl);
+    objectUrls.delete(id);
+    loadingIds.delete(id);
+    if (current != null) {
+      if (current === i) {
+        playerAudio.pause();
+        playerAudio.removeAttribute('src');
+        playerAudio.load();
+        if (library.length) {
+          current = Math.min(i, library.length - 1);
+          loadSong(current, false);
+        } else {
+          current = null;
+          setNP('No songs on the tape yet — add one with “+ ADD A SONG” above.', '');
+        }
+      } else if (current > i) {
+        current -= 1;
+      }
+    }
+    renderQueue();
+    syncPlayIcon();
+  }
+
+  function syncLibrary(data){
+    if (!Array.isArray(data)) return;
+    data = data.filter(d => !brokenIds.has(d.id));
+    const oldCurrentId = current != null && library[current] ? library[current].id : null;
+    const newIds = new Set(data.map(d => d.id));
+
+    for (const id of [...objectUrls.keys()]) {
+      if (!newIds.has(id)) {
+        URL.revokeObjectURL(objectUrls.get(id));
+        objectUrls.delete(id);
+      }
+    }
+    for (const id of [...loadingIds]) if (!newIds.has(id)) loadingIds.delete(id);
+    for (const id of [...brokenIds]) if (!newIds.has(id)) brokenIds.delete(id);
+
+    library = data;
+
+    if (!library.length) {
+      playerAudio.pause();
+      playerAudio.removeAttribute('src');
+      playerAudio.load();
+      current = null;
+      setNP('No songs on the tape yet — add one with “+ ADD A SONG” above.', '');
+      renderQueue();
+      syncPlayIcon();
+      return;
+    }
+
+    if (oldCurrentId) {
+      const idx = library.findIndex(s => s.id === oldCurrentId);
+      if (idx === -1) {
+        current = 0;
+        loadSong(0, false);
+        return;
+      }
+      current = idx;
+    } else {
+      current = 0;
+    }
+    setNP(library[current].title || 'Untitled', [library[current].artist, library[current].addedBy ? `from ${library[current].addedBy}` : ''].filter(Boolean).join(' · '));
+    renderQueue();
+    syncPlayIcon();
+  }
+
+  function refreshLibrary(){
+    loadLibrary().then(syncLibrary).catch(() => {});
+  }
+
+  function validateSongs(entries){
+    if (!Array.isArray(entries)) return entries;
+    if (location.protocol === 'file:') return Promise.resolve(entries);
+    let changed = false;
+    return Promise.all(entries.map(entry =>
+      fetch(entry.url, { headers: { Range: 'bytes=0-0' } })
+        .then(res => {
+          if (!res.ok) throw new Error('missing');
+          return entry;
+        })
+        .catch(() => {
+          brokenIds.add(entry.id);
+          changed = true;
+          return null;
+        })
+    )).then(list => {
+      if (changed) rememberBroken();
+      return list.filter(Boolean);
+    });
+  }
+
   function subscribeRealtime(){
     const sb = window.supabaseClient;
     if (!sb) return;
@@ -248,26 +372,24 @@
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'songs' }, ({ new: row }) => {
         addSongFromRow(row);
       })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'songs' }, ({ old: row }) => {
+        removeSongFromRow(row);
+      })
       .subscribe();
   }
 
   loadLibrary()
-    .then(data => {
-      if (!Array.isArray(data)) throw new Error('not an array');
-      library = data;
-      if (!library.length) {
-        setNP('No songs on the tape yet — add one with “+ ADD A SONG” above.', '');
-        return;
-      }
-      current = 0;
-      setNP(library[0].title || 'Untitled', [library[0].artist, library[0].addedBy ? `from ${library[0].addedBy}` : ''].filter(Boolean).join(' · '));
-      renderQueue();
-    })
+    .then(validateSongs)
+    .then(syncLibrary)
     .catch(() => {
       setNP("Couldn't load the song library — is Supabase configured? See the README.", '');
     });
 
   subscribeRealtime();
+
+  setInterval(refreshLibrary, 20000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshLibrary(); });
+  window.addEventListener('focus', refreshLibrary);
 
   const wakeEvents = ['pointerdown', 'keydown', 'touchstart'];
   const wake = () => {
