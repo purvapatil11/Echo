@@ -341,7 +341,7 @@
   }
 
   function refreshLibrary(){
-    loadLibrary().then(syncLibrary).catch(() => {});
+    loadLibrary().then(validateSongs).then(syncLibrary).catch(() => {});
   }
 
   function validateSongs(entries){
